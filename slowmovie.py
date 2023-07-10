@@ -21,8 +21,9 @@ import ffmpeg
 import configargparse
 from PIL import Image, ImageEnhance
 from fractions import Fraction
-from omni_epd import displayfactory, EPDNotFoundError
+#from omni_epd import displayfactory, EPDNotFoundError
 
+print("started")
 
 # Compatible video file-extensions
 fileTypes = [".avi", ".mp4", ".m4v", ".mkv", ".mov"]
@@ -31,18 +32,13 @@ subtitle_fileTypes = [".srt", ".ssa", ".ass"]
 
 # Move to the directory where this code is
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+print(os.path.dirname(os.path.realpath(__file__)))
 
 
 # Handle when the program is killed and exit gracefully
 def exithandler(signum, frame):
     logger.info("Exiting Program")
-    if args.clear:
-        epd.prepare()
-        epd.clear()
-    try:
-        epd.close()
-    finally:
-        sys.exit()
+    sys.exit()
 
 
 # Add hooks for interrupt signal
@@ -55,18 +51,26 @@ def clamp(n, smallest, largest):
 
 
 def generate_frame(in_filename, out_filename, time):
-    (
-        ffmpeg
-        .input(in_filename, ss=time)
-        .filter("scale", "iw*sar", "ih")
-        .fullscreen_filter()
-        .filter("scale", width, height, force_original_aspect_ratio=1)
-        .filter("pad", width, height, -1, -1)
-        .overlay_filter()
-        .output(out_filename, vframes=1, copyts=None)
-        .overwrite_output()
-        .run(capture_stdout=True, capture_stderr=True)
-    )
+    try:
+        print(in_filename)
+        print('starting ffmpeg')
+        (
+            ffmpeg
+            .input(in_filename, ss=time)
+            .fullscreen_filter()
+            .filter("scale", width, height, force_original_aspect_ratio=1)
+            .filter("pad", width, height, -1, -1)
+            .overlay_filter()
+            .output(out_filename, vframes=1, copyts=None)
+            .overwrite_output()
+            .run(capture_stdout=True, capture_stderr=True)
+        )
+    except ffmpeg.Error as e:
+        print('errors')
+        print('stdout:', e.stdout.decode('utf8'))
+        print('stderr:', e.stderr.decode('utf8'))
+        print('end of errors')
+
 
 
 def overlay_filter(self):
@@ -116,6 +120,7 @@ def video_info(file):
     if file in videoInfos:
         info = videoInfos[file]
     else:
+        print(os.getcwd())
         probeInfo = ffmpeg.probe(file, select_streams="v")
         stream = probeInfo["streams"][0]
 
@@ -240,7 +245,7 @@ parser.add_argument("-o", "--loglevel", default="INFO", type=str.upper, choices=
 # frame update controls
 argsControl = parser.add_argument_group("Frame Update Args", "arguments that control frame updates and display")
 argsControl.add_argument("-r", "--random-frames", action="store_true", help="choose a random frame every refresh")
-argsControl.add_argument("-d", "--delay", default=120, type=int, help="delay in seconds between screen updates (default: %(default)s)")
+argsControl.add_argument("-d", "--delay", default=2, type=int, help="delay in seconds between screen updates (default: %(default)s)")
 argsControl.add_argument("-i", "--increment", default=4, type=int, help="advance INCREMENT frames each refresh (default: %(default)s)")
 argsControl.add_argument("-s", "--start", type=int, help="start playing at a specific frame")
 argsControl.add_argument("-F", "--fullscreen", action="store_true", help="expand image to fill display")
@@ -259,6 +264,7 @@ args = parser.parse_args()
 # Set log level
 logger.setLevel(getattr(logging, args.loglevel))
 
+'''
 # Set up e-Paper display - do this first since we can't do much if it fails
 try:
     epd = displayfactory.load_display_driver(args.epd)
@@ -271,10 +277,11 @@ except EPDNotFoundError:
 
     # can't get past this
     sys.exit(1)
+'''
 
 # set width and height
-width = epd.width
-height = epd.height
+width = 1072
+height = 1448
 
 # Set path of Videos directory and logs directory. Videos directory can be specified by CLI --directory
 if args.directory:
@@ -336,6 +343,8 @@ if not (args.random_file and args.random_frames):
 
 videoFilename = os.path.basename(currentVideo)
 viddir = os.path.dirname(currentVideo)
+print(os.path.dirname(currentVideo))
+
 
 progressfile = os.path.join(progressdir, f"{videoFilename}.progress")
 
@@ -374,7 +383,7 @@ while True:
 
     # Note the time when starting to display so later we can sleep for the delay value minus how long this takes
     timeStart = time.perf_counter()
-    epd.prepare()
+    #epd.prepare()
 
     if args.random_frames:
         currentFrame = random.randint(0, videoInfo["frame_count"])
@@ -382,10 +391,10 @@ while True:
     msTimecode = f"{int(currentFrame * videoInfo['frame_time'])}ms"
 
     # Use ffmpeg to extract a frame from the movie, letterbox/pillarbox it, and put it in memory as frame.bmp
-    generate_frame(currentVideo, "/dev/shm/frame.bmp", msTimecode)
+    generate_frame(currentVideo, "frame.bmp", msTimecode)
 
     # Open frame.bmp in PIL
-    pil_im = Image.open("/dev/shm/frame.bmp")
+    pil_im = Image.open("frame.bmp")
 
     # Adjust contrast if specified
     if args.contrast != 1:
@@ -394,7 +403,7 @@ while True:
 
     # Display the image
     logger.debug(f"Displaying frame {int(currentFrame)} of {videoFilename} ({(currentFrame/videoInfo['frame_count'])*100:.1f}%)")
-    epd.display(pil_im)
+    #epd.display(pil_im)
 
     # Increment the position
     if args.random_frames:
@@ -433,7 +442,7 @@ while True:
         with open(progressfile, "w") as log:
             log.write(str(currentFrame))
 
-    epd.sleep()
+    #epd.sleep()
 
     # Adjust sleep delay to account for the time since we started updating this frame.
     timeDiff = time.perf_counter() - timeStart
