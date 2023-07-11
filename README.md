@@ -24,7 +24,7 @@ Make sure your Kindle is Jailbroken and running KUAL, MR Package Installer (MRPI
 - [Jailbreak <= 5.14.2](https://www.mobileread.com/forums/showthread.php?t=346037)
 - [Tools - KUAL, MRPI, USBnetwork](https://www.mobileread.com/forums/showthread.php?t=225030)
 
-Then follow the 'Installation' and 'How to Run' sections from the [Kindlefusion](https://github.com/diggedypomme/Kindlefusion) page. ( You can skip steps 4 and 5 in 'Installation' )
+Then follow the 'Installation' and 'How to Run' sections from the [Kindlefusion](https://github.com/diggedypomme/Kindlefusion) page. ( You can skip steps 4 and 5 in 'Installation' ) This project will be piggybacking off the webserver that runs on the Kindle that Kindlefusion provides.
 
 # Main Install
 
