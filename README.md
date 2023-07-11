@@ -4,13 +4,13 @@ Turn your Kindle into an E-ink picture frame that displays movies in a slow mann
 
 # Background
 
-I first learned of this slow movie player + e ink concept from a hackady article [SlowMovie](https://github.com/TomWhitwell/SlowMovie) as well as a few other existing implementations of the e-ink slow movie player concept. I also found the [Kindlefusion](https://github.com/diggedypomme/Kindlefusion) project where old kindles are used to display AI-generated picture frames. Hence I felt that by merging these 2 ideas together it could make for a good use of my old unused kindle lying around and collecting dust.
+I first learned of this slow movie player + e ink concept from a Hackaday article [SlowMovie](https://github.com/TomWhitwell/SlowMovie). I also found the [Kindlefusion](https://github.com/diggedypomme/Kindlefusion) project where old kindles are used to display AI-generated picture frames. Hence I felt that by merging these 2 ideas together it could make for a good use of my old unused kindle lying around and collecting dust.
 
-On top of that, with the shortage of Raspberry Pis combined with the lack of / expensive high resolution E-ink displays, this makes for a pretty feasible budget option as you can find 2nd-hand kindles for cheap nowadays.
+On top of that, with the shortage of Raspberry Pis combined with the lack of and expensive high resolution E-ink displays, this makes for a pretty feasible budget option as you can find 2nd-hand kindles for dirt cheap nowadays.
 
 # Implementation
 
-Theres a couple options to implement SlowMovie-Kindle. Since different Kindles have different storage sizes, you could be limited by the size of the video file and frames you can load onto it. These solutions seek to help with that by storing and processing the frames on a seperate server / PC and automatically sending them to the Kindle. 
+There is a couple options to implement SlowMovie-Kindle. Since different Kindles have different storage sizes, you could be limited by the size of the video file and frames you are able to load onto it. These solutions seek to help with that by storing and processing the frames on a seperate server / PC and automatically sending them to the Kindle. 
 
 1. Kindle + Docker 
 2. Kindle + Python Script
