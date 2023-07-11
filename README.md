@@ -1,8 +1,6 @@
 # SlowMovie-Kindle
 
-**WIP**
-
-A very slow movie player for jailbroken Kindle devices.
+Turn your Kindle into an E-ink picture frame that displays movies in a slow manner.
 
 # Background
 
