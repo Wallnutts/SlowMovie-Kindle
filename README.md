@@ -4,7 +4,7 @@ Turn your Kindle into an E-ink picture frame that displays movies in a slow mann
 
 # Background
 
-I first learned of this slow movie player + e ink concept from a hackady article [SlowMovie](https://github.com/TomWhitwell/SlowMovie) as well as a few other existing implementations of the e-ink slow movie player concept. I also found [this](https://github.com/diggedypomme/Kindlefusion) project where old kindles are used to display AI-generated picture frames. Hence I felt that by merging these 2 ideas together it could make for a good use of my old unused kindle lying around and collecting dust.
+I first learned of this slow movie player + e ink concept from a hackady article [SlowMovie](https://github.com/TomWhitwell/SlowMovie) as well as a few other existing implementations of the e-ink slow movie player concept. I also found the [Kindlefusion](https://github.com/diggedypomme/Kindlefusion) project where old kindles are used to display AI-generated picture frames. Hence I felt that by merging these 2 ideas together it could make for a good use of my old unused kindle lying around and collecting dust.
 
 On top of that, with the shortage of Raspberry Pis combined with the lack of / expensive high resolution E-ink displays, this makes for a pretty feasible budget option as you can find 2nd-hand kindles for cheap nowadays.
 
