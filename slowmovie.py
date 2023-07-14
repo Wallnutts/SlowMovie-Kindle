@@ -1,15 +1,6 @@
 #!/usr/bin/python3
 # -*- coding:utf-8 -*-
 
-# *************************
-# ** Before running this **
-# ** code ensure you've  **
-# ** turned on SPI on    **
-# ** your Raspberry Pi   **
-# ** & installed the     **
-# ** Waveshare library   **
-# *************************
-
 import os
 import time
 import sys
@@ -21,9 +12,12 @@ import ffmpeg
 import configargparse
 from PIL import Image, ImageEnhance
 from fractions import Fraction
+from io import BytesIO
 #from omni_epd import displayfactory, EPDNotFoundError
 
-print("started")
+import vsmpkindle
+
+print("----------------START----------------")
 
 # Compatible video file-extensions
 fileTypes = [".avi", ".mp4", ".m4v", ".mkv", ".mov"]
@@ -34,6 +28,8 @@ subtitle_fileTypes = [".srt", ".ssa", ".ass"]
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 print(os.path.dirname(os.path.realpath(__file__)))
 
+
+#------------------------------Functions------------------------------#
 
 # Handle when the program is killed and exit gracefully
 def exithandler(signum, frame):
@@ -54,6 +50,7 @@ def generate_frame(in_filename, out_filename, time):
     try:
         print(in_filename)
         print('starting ffmpeg')
+        print('Resizing to: ' , width , ' X ' , height , ' at ' , time)
         (
             ffmpeg
             .input(in_filename, ss=time)
@@ -66,7 +63,7 @@ def generate_frame(in_filename, out_filename, time):
             .run(capture_stdout=True, capture_stderr=True)
         )
     except ffmpeg.Error as e:
-        print('errors')
+        print('ffmpeg frame generate errors')
         print('stdout:', e.stdout.decode('utf8'))
         print('stderr:', e.stderr.decode('utf8'))
         print('end of errors')
@@ -120,7 +117,8 @@ def video_info(file):
     if file in videoInfos:
         info = videoInfos[file]
     else:
-        print(os.getcwd())
+        print('video_info')
+        print(file)
         probeInfo = ffmpeg.probe(file, select_streams="v")
         stream = probeInfo["streams"][0]
 
@@ -222,11 +220,18 @@ class ArgparseLogger(configargparse.ArgumentParser):
         logger.error(message)
         sys.exit(1)
 
+#------------------------------Logging------------------------------#
 
 # Set up logging
 logger = logging.getLogger()
 
-fileHandler = logging.FileHandler("slowmovie.log")
+logsdir = "logs"
+
+# Create logs directories if missing
+if not os.path.isdir(logsdir):
+    os.mkdir(logsdir)
+
+fileHandler = logging.FileHandler("logs/slowmovie.log")
 fileHandler.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)-8s: %(module)s : %(message)s"))
 logger.addHandler(fileHandler)
 
@@ -253,31 +258,20 @@ textOverlayGroup = argsControl.add_mutually_exclusive_group()
 textOverlayGroup.add_argument("-S", "--subtitles", action="store_true", help="display SRT subtitles")
 textOverlayGroup.add_argument("-t", "--timecode", action="store_true", help="display video timecode")
 
-# epd controls
-argsEpd = parser.add_argument_group("EPD Args", "arguments to select and modify the e-Ink display")
-argsEpd.add_argument("-e", "--epd", help="the name of the display device driver to use")
+# display controls
+argsEpd = parser.add_argument_group("Display Args", "arguments to modify and edit the shown image")
 argsEpd.add_argument("-c", "--contrast", default=1.0, type=float, help="adjust image contrast (default: %(default)s)")
 argsEpd.add_argument("-C", "--clear", action="store_true", help="clear display on exit")
+
+# kindle address controls
+argsControl.add_argument("-u", "--url", type=str, help="kindle url to send frames to")
 
 args = parser.parse_args()
 
 # Set log level
 logger.setLevel(getattr(logging, args.loglevel))
 
-'''
-# Set up e-Paper display - do this first since we can't do much if it fails
-try:
-    epd = displayfactory.load_display_driver(args.epd)
-except EPDNotFoundError:
-    # EPD not found, give a list of supported displays
-    validEpds = displayfactory.list_supported_displays()
-
-    logger.error(f"'{args.epd}' is not a valid EPD name, valid names are:")
-    logger.error("\n".join(map(str, validEpds)))
-
-    # can't get past this
-    sys.exit(1)
-'''
+#------------------------------Main Block------------------------------#
 
 # set width and height
 width = 1072
@@ -288,7 +282,7 @@ if args.directory:
     viddir = args.directory
 else:
     viddir = "Videos"
-progressdir = "progress"
+    progressdir = "progress"
 
 # Create progress and Videos directories if missing
 if not os.path.isdir(progressdir):
@@ -309,16 +303,16 @@ if not currentVideo and args.random_file:
     currentVideo = get_random_video(viddir)
 
 # ...then try the nowPlaying file, which stores the last played video...
-if not currentVideo and os.path.isfile("nowPlaying"):
+if not currentVideo and os.path.isfile("logs/nowPlaying"):
     logger.debug("...trying the video in the nowPlaying file...")
-    with open("nowPlaying") as file:
+    with open("logs/nowPlaying") as file:
         lastVideo = os.path.abspath(file.readline().strip())
     if os.path.isfile(lastVideo):
         if os.path.dirname(lastVideo) == os.path.abspath(viddir) or not args.directory:
             currentVideo = lastVideo
     else:
         logger.warning(f"'{lastVideo}' read from nowPlaying file couldn't be found. Removing nowPlaying directory for recreation.")
-        os.remove("nowPlaying")
+        os.remove("logs/nowPlaying")
 
 # ...then just pick the first video in the videos directory...
 if not currentVideo:
@@ -338,13 +332,12 @@ if not args.random_frames:
 
 if not (args.random_file and args.random_frames):
     # Write the current video to the nowPlaying file
-    with open("nowPlaying", "w") as file:
+    with open("logs/nowPlaying", "w") as file:
         file.write(os.path.abspath(currentVideo))
 
 videoFilename = os.path.basename(currentVideo)
 viddir = os.path.dirname(currentVideo)
-print(os.path.dirname(currentVideo))
-
+print("loading video path:" , os.path.dirname(currentVideo))
 
 progressfile = os.path.join(progressdir, f"{videoFilename}.progress")
 
@@ -393,6 +386,9 @@ while True:
     # Use ffmpeg to extract a frame from the movie, letterbox/pillarbox it, and put it in memory as frame.bmp
     generate_frame(currentVideo, "frame.bmp", msTimecode)
 
+    # Display the image
+    logger.debug(f"Displaying frame {int(currentFrame)} of {videoFilename} ({(currentFrame/videoInfo['frame_count'])*100:.1f}%)")
+
     # Open frame.bmp in PIL
     pil_im = Image.open("frame.bmp")
 
@@ -401,9 +397,13 @@ while True:
         enhancer = ImageEnhance.Contrast(pil_im)
         pil_im = enhancer.enhance(args.contrast)
 
-    # Display the image
-    logger.debug(f"Displaying frame {int(currentFrame)} of {videoFilename} ({(currentFrame/videoInfo['frame_count'])*100:.1f}%)")
-    #epd.display(pil_im)
+    # Convert the image to bytes to send to kindle thru html
+    pil_im_bytes = BytesIO()
+    pil_im.save(pil_im_bytes, format='PNG')
+    pil_im_bytes.seek(0)
+
+    print(args.url)
+    vsmpkindle.send_to_kindle(pil_im_bytes, args.url)
 
     # Increment the position
     if args.random_frames:
@@ -425,7 +425,7 @@ while True:
                     currentVideo = get_next_video(viddir, videoFilename)
 
                 # Note new video in nowPlaying file
-                with open("nowPlaying", "w") as file:
+                with open("logs/nowPlaying", "w") as file:
                     file.write(os.path.abspath(currentVideo))
 
                 # Update videoFilepath for new video

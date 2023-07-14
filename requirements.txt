@@ -16,3 +16,4 @@ opencv-python==4.8.0.74
 Pillow==10.0.0
 protobuf==3.20.3
 Werkzeug==2.3.6
+requests==2.31.0

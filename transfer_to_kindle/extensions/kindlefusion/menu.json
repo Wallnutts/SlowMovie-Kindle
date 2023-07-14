@@ -1,0 +1,80 @@
+{
+	"items": [
+	{
+		"name": "kindlefusion",
+		"priority": -8,
+		"items": [
+		{
+			"name": "Start Kindlefusion",
+			"priority": 1,
+			"action": "./bin/start_kindlefusion.sh",
+			"exitmenu": false,
+			"checked": false,
+			"status": false,
+			"internal": "Start Kindlefusion"
+		},
+		{
+			"name": "Stop Kindlefusion",
+			"priority": 2,
+			"action": "./bin/kill_kindlefusion.sh",
+			"exitmenu": false,
+			"checked": false,
+			"status": false,
+			"internal": "Stop Kindlefusion"
+		}
+		,
+		{
+			"name": "Show current ip",
+			"action": "./bin/checkip.sh",
+			"params": "show_version",
+			"exitmenu": false,
+			"checked": true,
+			"refresh": false,
+			"status": false,
+			"internal": "status Print the current ip of the hack"
+		},
+		{
+			"name": "* open 5000 *",
+			"action": "./bin/open5000.sh",
+			"params": "toggle_usbnet",
+			"exitmenu": false,
+			"checked": true,
+			"refresh": false,
+			"status": false,
+			"internal": "open port 5000 and make writeable"
+		},
+		{
+			"name": "* install libraries *",
+			"action": "./bin/libraries.sh",
+			"params": "install_libraries",
+			"exitmenu": false,
+			"checked": true,
+			"refresh": false,
+			"status": false,
+			"internal": "install libraries"
+		},
+		{
+			"name": "* Disable Screensavers *",
+			"action": "./bin/ssprevent.sh",
+			"params": "disable_screensavers",
+			"exitmenu": false,
+			"checked": true,
+			"refresh": false,
+			"status": false,
+			"internal": "Disable Screensavers"
+		},
+		{
+			"name": "* Enable Screensavers *",
+			"action": "./bin/ssallow.sh",
+			"params": "enable_screensavers",
+			"exitmenu": false,
+			"checked": true,
+			"refresh": false,
+			"status": false,
+			"internal": "Re-enable screensavers"
+		}
+		
+		]
+	}
+	]
+}
