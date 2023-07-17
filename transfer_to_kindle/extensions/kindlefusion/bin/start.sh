@@ -2,10 +2,14 @@
 
 eips -c 
 
+eips 0 0 "starting program"
 
-eips 15 16 "Starting SlowMovie"
+iptables -A INPUT -p tcp --dport 5000 -i wlan0 -j ACCEPT
+echo "opened"
+mntroot rw
+echo "writeable"
 
+eips 0 0 "port opened and made writeable"
 
-
-cd /mnt/us/kindlefusion/ && python3 slowmoviekindle.py
+cd /mnt/us/kindlefusion; /usr/bin/python3 /mnt/us/kindlefusion/stable17.py  2&>1 | tee logfile.log
 

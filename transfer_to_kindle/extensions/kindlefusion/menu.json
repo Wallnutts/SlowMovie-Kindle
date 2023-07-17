@@ -5,18 +5,18 @@
 		"priority": -8,
 		"items": [
 		{
-			"name": "Start Kindlefusion",
+			"name": "Start SlowMovie",
 			"priority": 1,
-			"action": "./bin/start_kindlefusion.sh",
+			"action": "./bin/start.sh",
 			"exitmenu": false,
 			"checked": false,
 			"status": false,
 			"internal": "Start Kindlefusion"
 		},
 		{
-			"name": "Stop Kindlefusion",
+			"name": "Stop SlowMovie",
 			"priority": 2,
-			"action": "./bin/kill_kindlefusion.sh",
+			"action": "./bin/stop.sh",
 			"exitmenu": false,
 			"checked": false,
 			"status": false,

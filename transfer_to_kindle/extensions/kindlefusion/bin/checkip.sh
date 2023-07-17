@@ -4,8 +4,8 @@
 ip_output=$( ip addr show dev wlan0 | grep "inet " | awk '{print $2}')
 echo "$ip_output"
 
-#eips 10 10 "$ip_output"
-/mnt/us/usbnet/bin/fbink -pmM -y -15 "$ip_output"
+eips 0 0 "$ip_output"
+#/mnt/us/usbnet/bin/fbink -pmM -y -15 "$ip_output"
 
 stringZ=abcABC123ABCabc
 #       0123456789.....
